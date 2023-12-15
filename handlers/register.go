@@ -5,8 +5,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/KirigayaKazuto91/go-login/databases"
+	"github.com/KirigayaKazuto91/go-login/models"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -17,14 +18,13 @@ type User struct {
 }
 
 func RegisterPage(w http.ResponseWriter, r *http.Request){
-	dsn := "host=localhost user=postgres password=root dbname=projectone port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	
+	db, err := databases.ConnectDB()
 	if err != nil{
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&User{})
-	
-	
+	models.MigrateUsers(db)
+
 	if r.Method != http.MethodPost{
 		http.ServeFile(w, r, "./templates/registrasi.html")
 		return

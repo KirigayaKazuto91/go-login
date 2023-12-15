@@ -8,8 +8,6 @@ import (
 	"github.com/KirigayaKazuto91/go-login/handlers"
 )
 
-
-
 func main() {
 	http.HandleFunc("/login", handlers.LoginPage)
 	http.HandleFunc("/home", handlers.HomePage)
