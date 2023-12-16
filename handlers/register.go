@@ -1,12 +1,11 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/KirigayaKazuto91/go-login/databases"
 	"github.com/KirigayaKazuto91/go-login/models"
+	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -17,35 +16,29 @@ type User struct {
 	Password string
 }
 
-func RegisterPage(w http.ResponseWriter, r *http.Request){
-	
+func RegisterPage(c *fiber.Ctx) error {
+	return c.SendFile("./templates/registrasi.html")
+}
+
+func StoreUser(c *fiber.Ctx) error {
 	db, err := databases.ConnectDB()
 	if err != nil{
 		log.Fatal(err)
 	}
 	models.MigrateUsers(db)
 
-	if r.Method != http.MethodPost{
-		http.ServeFile(w, r, "./templates/registrasi.html")
-		return
-	}
-
-		username := r.FormValue("username")
-		password := r.FormValue("password")
+		username := c.FormValue("username")
+		password := c.FormValue("password")
 
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil{
-			http.Error(w, "Failed to hash the password", http.StatusInternalServerError)
-			return
+			return c.SendStatus(fiber.StatusNotAcceptable)
 		}
 	
 		newUser := User{Username: username, Password: string(hashedPassword)}
 		result := db.Create(&newUser)
 		if result.Error != nil{
-			http.Error(w, "Failed to register user", http.StatusInternalServerError)
-			return
+			return c.SendStatus(fiber.StatusExpectationFailed)
 		}
-		
-		fmt.Fprintf(w, "User Registered successfully!")
-		return
+		return c.SendStatus(fiber.StatusCreated)
 }

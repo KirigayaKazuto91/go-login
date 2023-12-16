@@ -1,24 +1,26 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/KirigayaKazuto91/go-login/handlers"
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	http.HandleFunc("/login", handlers.LoginPage)
-	http.HandleFunc("/home", handlers.HomePage)
-	http.HandleFunc("/register", handlers.RegisterPage)
+	app := fiber.New()
+	app.Static("/", "./templates")
+	
+	app.Get("/home", handlers.HomePage)
+	app.Get("/login", handlers.LoginPage)
+	app.Post("/login", handlers.CheckLogin)
+
+	app.Get("/register", handlers.RegisterPage)
+	app.Post("/register", handlers.StoreUser)
+
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./templates/css"))))
 	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("./templates/js"))))
 
-	fmt.Printf("Starting server at localhost:8080\n")
-	
-	err := http.ListenAndServe(":8080", nil)
-	if  err != nil {
-		log.Fatal("Server failed to start: ", err)
-	}
+	app.Listen(":8080")
+
 }

@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"net/http"
+	"github.com/gofiber/fiber/v2"
 )
 
-func HomePage(w http.ResponseWriter, r *http.Request)  {
-	http.ServeFile(w, r, "./templates/home.html")
+func HomePage(c *fiber.Ctx) error {
+	return c.SendFile("./templates/home.html")
 }
